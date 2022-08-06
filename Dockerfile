@@ -8,31 +8,33 @@ ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/commandlinetools-l
     GRADLE_HOME="/usr/share/gradle" \
     SDK_MANAGER_PATH="/opt/android-sdk/cmdline-tools/latest" \
     ANDROID_SDK_ROOT="/opt/android-sdk"
-#ENV JAVA_HOME /usr/lib/jvm/java-16-openjdk-amd64
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
-#ENV IONIC_VERSION 6.17.0
-ENV IONIC_VERSION 6.20.1
+ENV NODE_VERSION v16.6.0
+ENV IONIC_VERSION 6.17.0
 ENV GRADLE_VERSION 7.5
 
 ENV PATH $PATH:$ANDROID_SDK_ROOT/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$ANT_HOME/bin:$MAVEN_HOME/bin:$GRADLE_HOME/bin
 
 RUN apt-get update && \
-    #apt-get -y install openjdk-16-jdk-headless && \
     apt-get -y install openjdk-17-jdk-headless && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     java -version && \
     apt-get update && apt-get install -y curl gnupg2 lsb-release && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    apt-key fingerprint 1655A0AB68576280 && \
-    export VERSION=node_16.x && \
-    export DISTRO="$(lsb_release -s -c)" && \
-    echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | tee /etc/apt/sources.list.d/nodesource.list && \
-    echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
-    apt-get update && apt-get install -y nodejs && \
+    #curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+    #apt-key fingerprint 1655A0AB68576280 && \
+    #export VERSION=node_16.x && \
+    #export DISTRO="$(lsb_release -s -c)" && \
+    #echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | tee /etc/apt/sources.list.d/nodesource.list && \
+    #echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
+    #apt-get update && apt-get install -y nodejs && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
+    nvm install ${NODE_VERSION} && \
     node -v && npm -v && \
-    npm install -g yarn && \
-    yarn -v && \
+    #npm install -g yarn && \
+    #yarn -v && \
     apt-get update && apt-get install -y python && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
