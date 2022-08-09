@@ -8,15 +8,22 @@ ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/commandlinetools-l
     GRADLE_HOME="/usr/share/gradle" \
     SDK_MANAGER_PATH="/opt/android-sdk/cmdline-tools/latest" \
     ANDROID_SDK_ROOT="/opt/android-sdk"
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
-ENV NODE_VERSION v16.6.0
+ENV JAVA_VERSION 16
+ENV JAVA_HOME /usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64
+ENV NVM_DIR /usr/local/nvm
+ENV NODE_VERSION v16.10.0
 ENV IONIC_VERSION 6.17.0
-ENV GRADLE_VERSION 7.5
+#ENV GRADLE_VERSION 7.5
 
-ENV PATH $PATH:$ANDROID_SDK_ROOT/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$ANT_HOME/bin:$MAVEN_HOME/bin:$GRADLE_HOME/bin
+#ENV NODE_PATH ${NVM_DIR}/${NODE_VERSION}/lib/node_modules:${NVM_DIR}/versions/node/${NODE_VERSION}/bin
+ENV PATH $PATH:$ANDROID_SDK_ROOT/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$ANT_HOME/bin:$MAVEN_HOME/bin
+#:$GRADLE_HOME/bin:$NODE_PATH
 
-RUN apt-get update && \
-    apt-get -y install openjdk-17-jdk-headless && \
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh && \
+    apt-get update && \
+    apt-get install -yq tzdata && ln -fs /usr/share/zoneinfo/America/Mexico_City /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    apt-get -y install openjdk-${JAVA_VERSION}-jdk-headless python git unzip bzip2 openssh-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     java -version && \
@@ -28,18 +35,10 @@ RUN apt-get update && \
     #echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | tee /etc/apt/sources.list.d/nodesource.list && \
     #echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
     #apt-get update && apt-get install -y nodejs && \
+    mkdir -p ${NVM_DIR} && \
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash && \
-    export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
-    nvm install ${NODE_VERSION} && \
+    . $NVM_DIR/nvm.sh && nvm install ${NODE_VERSION} && nvm alias default ${NODE_VERSION} && \
     node -v && npm -v && \
-    #npm install -g yarn && \
-    #yarn -v && \
-    apt-get update && apt-get install -y python && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
-
-RUN apt-get update && apt-get install -y git unzip bzip2 openssh-client && \
     npm install -g --unsafe-perm @ionic/cli@${IONIC_VERSION} && \
     ionic --version && \
     cd /tmp && \
@@ -50,9 +49,9 @@ RUN apt-get update && apt-get install -y git unzip bzip2 openssh-client && \
     rm -rf /var/lib/apt/lists/* && apt-get clean && \
     apt-get -qq update && \
     apt-get -qq install -y wget curl maven ant && \
-    wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -P /tmp && \
-    unzip -d /opt/gradle /tmp/gradle-${GRADLE_VERSION}-bin.zip && \
-    ln -s /opt/gradle/gradle-${GRADLE_VERSION} ${GRADLE_HOME} && \
+    #wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -P /tmp && \
+    #unzip -d /opt/gradle /tmp/gradle-${GRADLE_VERSION}-bin.zip && \
+    #ln -s /opt/gradle/gradle-${GRADLE_VERSION} ${GRADLE_HOME} && \
     mkdir ${ANDROID_SDK_ROOT} && cd ${ANDROID_SDK_ROOT} && \
     wget -O tools.zip ${ANDROID_SDK_URL} && \
     unzip tools.zip && rm tools.zip && \
@@ -70,4 +69,6 @@ RUN apt-get update && apt-get install -y git unzip bzip2 openssh-client && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     apt-get autoremove -y && \
     apt-get clean && \
-    mvn -v && gradle -v && java -version && ant -version
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    mvn -v  && java -version && ant -version
+    # gradle -version
