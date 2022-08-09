@@ -15,8 +15,8 @@ ENV NODE_VERSION v16.10.0
 ENV IONIC_VERSION 6.17.0
 #ENV GRADLE_VERSION 7.5
 
-#ENV NODE_PATH ${NVM_DIR}/${NODE_VERSION}/lib/node_modules:${NVM_DIR}/versions/node/${NODE_VERSION}/bin
-ENV PATH $PATH:$ANDROID_SDK_ROOT/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$ANT_HOME/bin:$MAVEN_HOME/bin
+ENV NODE_PATH ${NVM_DIR}/${NODE_VERSION}/lib/node_modules:${NVM_DIR}/versions/node/${NODE_VERSION}/bin
+ENV PATH $PATH:$ANDROID_SDK_ROOT/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$ANT_HOME/bin:$MAVEN_HOME/bin:$NODE_PATH
 #:$GRADLE_HOME/bin:$NODE_PATH
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh && \
@@ -36,9 +36,10 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh && \
     #echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
     #apt-get update && apt-get install -y nodejs && \
     mkdir -p ${NVM_DIR} && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | /bin/bash && \
     . $NVM_DIR/nvm.sh && nvm install ${NODE_VERSION} && nvm alias default ${NODE_VERSION} && \
     node -v && npm -v && \
+    whereis npm && \
     npm install -g --unsafe-perm @ionic/cli@${IONIC_VERSION} && \
     ionic --version && \
     cd /tmp && \
